@@ -13,7 +13,7 @@ from config.settings import settings
 
 from routes.index import router as index_router
 
-from utils.index import AppError
+from utils.error import AppError
 from routes.user import (
     router as user_router,
 )
