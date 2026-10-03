@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from config.database import (
     connect_database,
+    create_indexes,
     disconnect_database,
 )
 from config.settings import settings
@@ -13,11 +14,17 @@ from config.settings import settings
 from routes.index import router as index_router
 
 from utils.index import AppError
+from routes.user import (
+    router as user_router,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     await connect_database()
+
+    await create_indexes()
 
     yield
 
@@ -64,6 +71,5 @@ async def root():
     }
 
 
-app.include_router(
-    index_router
-)
+app.include_router(index_router)
+app.include_router(user_router)

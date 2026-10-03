@@ -1,22 +1,54 @@
-from datetime import datetime, timezone
-from uuid import uuid4
+import hashlib
+import secrets
+
+import bcrypt
 
 
-class AppError(Exception):
-    def __init__(
-        self,
-        status_code: int,
-        message: str,
-    ):
-        self.status_code = status_code
-        self.message = message
+def hash_password(
+    password: str,
+) -> str:
 
-        super().__init__(message)
+    password_bytes = password.encode("utf-8")
+
+    if len(password_bytes) > 72:
+        raise AppError(
+            400,
+            "Password cannot exceed 72 UTF-8 bytes.",
+        )
+
+    hashed = bcrypt.hashpw(
+        password_bytes,
+        bcrypt.gensalt(rounds=12),
+    )
+
+    return hashed.decode("utf-8")
 
 
-def get_id() -> str:
-    return str(uuid4())
+def verify_password(
+    password: str,
+    password_hash: str,
+) -> bool:
+
+    try:
+        return bcrypt.checkpw(
+            password.encode("utf-8"),
+            password_hash.encode("utf-8"),
+        )
+
+    except ValueError:
+        return False
 
 
-def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+def generate_otp() -> str:
+    return str(secrets.randbelow(900_000) + 100_000)
+
+
+def generate_token() -> str:
+    return secrets.token_urlsafe(48)
+
+
+def hash_token(
+    token: str,
+) -> str:
+
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()

@@ -38,3 +38,25 @@ def get_database():
         raise RuntimeError("MongoDB has not been initialized.")
 
     return database
+
+
+async def create_indexes() -> None:
+
+    database = get_database()
+
+    await database.users.create_index(
+        "email",
+        unique=True,
+    )
+
+    await database.emailVerifications.create_index(
+        "email",
+        unique=True,
+    )
+
+    await database.accessTokens.create_index(
+        "tokenHash",
+        unique=True,
+    )
+
+    await database.accessTokens.create_index("userId")
